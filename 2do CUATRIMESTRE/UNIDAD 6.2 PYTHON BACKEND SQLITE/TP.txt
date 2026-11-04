@@ -1,8 +1,0 @@
-Hola.
-
-Deberán implementa runa solucion en Python como el ejemplo de People en SQLite.
-Tal cual hablamos en Clase.
-
-espero los resultados
-Un abrazo.
-Jose luis.
