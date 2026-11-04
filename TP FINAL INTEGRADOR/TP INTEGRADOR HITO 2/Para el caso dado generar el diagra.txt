@@ -1,4 +1,0 @@
-Para el caso dado generar el diagrama de Casos de Uso.
-
-Llenar 3 fichas (Modelo adjunto).
-Por favor realizarlo.
