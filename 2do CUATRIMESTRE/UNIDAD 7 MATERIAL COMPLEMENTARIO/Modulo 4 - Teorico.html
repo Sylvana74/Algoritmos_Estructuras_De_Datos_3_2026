@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AED III - Módulo 4: IA en Modelado y Diseño de Software</title>
+    <!-- Bibliotecas de Visualización y Estilo -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --apple-black: #1d1d1f;
+            --apple-gray: #86868b;
+            --apple-blue: #0071e3;
+            --apple-bg: #f5f5f7;
+            --gemini-gradient: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+            --glass: rgba(255, 255, 255, 0.85);
+            --transition-speed: 0.8s;
+            --transition-curve: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: white;
+            color: var(--apple-black);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Presentation Engine */
+        .presentation-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 60px;
+            position: relative;
+            background: white;
+        }
+
+        /* Nav Glassmorphism */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            background: var(--glass);
+            backdrop-filter: saturate(180%) blur(20px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto; padding: 0 30px; height: 52px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-logo { font-weight: 700; font-size: 0.95rem; letter-spacing: -0.02em; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a {
+            text-decoration: none; color: var(--apple-black); font-size: 0.75rem;
+            font-weight: 500; opacity: 0.6; transition: 0.3s;
+        }
+        .nav-links a:hover, .nav-links a.active { opacity: 1; color: var(--apple-blue); }
+
+        /* Sidebar Progress Dots */
+        .dots-menu {
+            position: fixed; right: 30px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 12px; z-index: 1000;
+        }
+        .dot {
+            width: 8px; height: 8px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: 0.4s var(--transition-curve);
+        }
+        .dot.active { background: var(--apple-blue); transform: scale(1.6); }
+
+        /* Carátulas Temáticas */
+        .cover-slide {
+            background: var(--apple-black);
+            color: white;
+            border-radius: 44px;
+            width: 100%;
+            height: 75vh;
+            display: grid;
+            grid-template-columns: 1.2fr 0.8fr;
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.25);
+        }
+        .cover-text { padding: 80px; display: flex; flex-direction: column; justify-content: center; text-align: left; }
+        .cover-text h2 { font-size: 3.8rem; color: white; margin: 0; line-height: 1; letter-spacing: -0.05em; }
+        .cover-img { position: relative; overflow: hidden; }
+        .cover-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.8; }
+
+        /* Slide Content structure */
+        .slide-content {
+            max-width: 1300px; width: 100%;
+            display: grid; grid-template-columns: 1fr 1fr;
+            gap: 60px; align-items: start;
+            opacity: 0; transform: translateY(40px);
+            transition: all var(--transition-speed) var(--transition-curve);
+        }
+        section.visible .slide-content { opacity: 1; transform: translateY(0); }
+
+        .full-width { grid-column: 1 / -1; text-align: center; }
+
+        h1 { font-size: clamp(2rem, 7vw, 4.5rem); font-weight: 800; letter-spacing: -0.05em; line-height: 1.1; margin: 0; }
+        h2 { font-size: 2.8rem; font-weight: 700; letter-spacing: -0.04em; margin-bottom: 25px; }
+        h3 { font-size: 1.5rem; font-weight: 600; color: var(--apple-blue); margin-bottom: 15px; }
+        p { font-size: 1.2rem; line-height: 1.8; color: #424245; text-align: justify; }
+
+        .tag {
+            text-transform: uppercase; font-size: 0.75rem; font-weight: 700;
+            letter-spacing: 0.2em; color: var(--apple-gray); margin-bottom: 15px; display: block;
+        }
+
+        /* Aesthetic Enhancements */
+        .card {
+            background: var(--apple-bg); border-radius: 36px; padding: 40px;
+            border: 1px solid rgba(0,0,0,0.03); text-align: left; transition: transform 0.4s ease;
+        }
+        .card:hover { transform: translateY(-8px); }
+        .card li { margin-bottom: 12px; font-size: 1.05rem; }
+
+        .img-box {
+            width: 100%; height: 500px; background: #eee; border-radius: 44px;
+            overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.12);
+        }
+        .img-box img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* TEXTUAL ARCHITECTURE LAYOUT */
+        .arch-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            width: 100%;
+            margin-top: 40px;
+        }
+        .arch-layer {
+            background: white;
+            border: 2px solid var(--apple-bg);
+            border-radius: 28px;
+            padding: 30px;
+            text-align: left;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+        }
+        .arch-layer h4 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--apple-gray);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--apple-bg);
+            padding-bottom: 10px;
+        }
+        .step-item {
+            margin-bottom: 20px;
+            padding-left: 15px;
+            border-left: 3px solid var(--apple-blue);
+        }
+        .step-item strong { display: block; font-size: 1.1rem; margin-bottom: 5px; color: var(--apple-black); }
+        .step-item span { font-size: 0.95rem; color: #666; display: block; line-height: 1.4; }
+
+        /* Gemini Interface */
+        .gemini-btn {
+            position: fixed; bottom: 35px; right: 35px; background: var(--gemini-gradient);
+            width: 72px; height: 72px; border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; color: white; cursor: pointer; box-shadow: 0 20px 45px rgba(0,0,0,0.35);
+            z-index: 1100;
+        }
+        #geminiModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.35); backdrop-filter: blur(25px); z-index: 2000;
+            justify-content: center; align-items: center;
+        }
+        .modal-card { background: white; width: 90%; max-width: 850px; border-radius: 44px; padding: 50px; position: relative; }
+        #chatInput { width: 100%; padding: 24px; border: 1px solid #d2d2d7; border-radius: 20px; font-size: 1.15rem; margin: 25px 0; outline: none; background: #fbfbfd; }
+        #chatResponse { background: #f5f5f7; padding: 28px; border-radius: 24px; max-height: 400px; overflow-y: auto; text-align: left; font-size: 1.05rem; }
+
+        .loader:after { content: '...'; animation: load 1.5s infinite; }
+        @keyframes load { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+
+        @media (max-width: 1100px) {
+            .slide-content { grid-template-columns: 1fr; gap: 40px; }
+            .cover-slide { grid-template-columns: 1fr; height: auto; }
+            .img-box { height: 350px; }
+            .arch-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo"> AED III - Unidad 7.4 Masterclass </div>
+            <div class="nav-links">
+                <a href="#intro">Inicio</a>
+                <a href="#ia-dev">Evolución</a>
+                <a href="#indice">Índice</a>
+                <a href="#portada-mermaid">Mermaid</a>
+                <a href="#portada-uml">UML</a>
+                <a href="#flujo-maestro">Flujo Maestro</a>
+                <a href="#cierre">Cierre</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dots-menu" id="dotNav"></div>
+
+    <div class="presentation-container" id="deck">
+        
+        <!-- S1: HERO -->
+        <section id="intro">
+            <div class="slide-content full-width">
+                <span class="tag">Módulo 4 · Ingeniería de Software Aumentada</span>
+                <h1>Modelado y Diseño con IA</h1>
+                <p>Nuevos paradigmas de soberanía técnica: Cómo el ingeniero pilota la inteligencia local para transformar la intención en arquitectura sistémica.</p>
+                <div class="img-box" style="height: 400px; max-width: 1000px; margin: 40px auto;">
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1400" alt="Ingeniería y Conectividad">
+                </div>
+            </div>
+        </section>
+
+        <!-- S2: INTRODUCCIÓN EXTENSA SOBRE IA EN DESARROLLO -->
+        <section id="ia-dev">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">La Nueva Era del Software</span>
+                    <h2>IA en el Desarrollo de Software</h2>
+                    <p>La inteligencia artificial ha dejado de ser un simple generador de fragmentos aislados para convertirse en el **eje vertebrador del diseño de software moderno**. En esta unidad, exploraremos cómo la IA local redefine el modelado técnico: no se trata solo de dibujar diagramas, sino de utilizar la capacidad de razonamiento probabilístico para validar diseños, detectar acoplamientos innecesarios y documentar sistemas complejos en segundos. <br><br> La verdadera revolución no reside en la automatización mecánica, sino en la **elevación del nivel de abstracción del ingeniero**. Ya no luchamos contra la sintaxis; pilotamos intenciones arquitectónicas complejas. A lo largo de este módulo, aprenderemos que lenguajes como Mermaid y UML no son solo visuales, son protocolos de comunicación entre la mente humana y el motor de inferencia local (Ollama), permitiendo una trazabilidad total desde el requerimiento abstracto hasta el binario ejecutable y optimizado.</p>
+                </div>
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=1200" alt="Frontera Tecnológica">
+                </div>
+            </div>
+        </section>
+
+        <!-- S3: ÍNDICE MAESTRO -->
+        <section id="indice">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Contenidos del Módulo</span>
+                    <h2>Hoja de Ruta de Modelado</h2>
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 30px; text-align: left;">
+                        <div class="card" onclick="scrollToId('portada-mermaid')" style="padding: 25px; cursor: pointer;">
+                            <h3>1. El Estándar Mermaid</h3>
+                            <p style="font-size: 1rem;">Modelado textual como código (DaC) y el fin de la diagramación manual repetitiva.</p>
+                        </div>
+                        <div class="card" onclick="scrollToId('portada-uml')" style="padding: 25px; cursor: pointer;">
+                            <h3>2. Generación UML Dinámica</h3>
+                            <p style="font-size: 1rem;">Automatización de Clases, Secuencia y Estado mediante inferencia semántica local.</p>
+                        </div>
+                        <div class="card" onclick="scrollToId('portada-inversa')" style="padding: 25px; cursor: pointer;">
+                            <h3>3. Ingeniería Inversa Asistida</h3>
+                            <p style="font-size: 1rem;">Arqueología de software: Cómo extraer arquitectura de codebases heredados mediante IA.</p>
+                        </div>
+                        <div class="card" onclick="scrollToId('portada-validacion')" style="padding: 25px; cursor: pointer;">
+                            <h3>4. Auditoría de Diseño</h3>
+                            <p style="font-size: 1rem;">Criterio crítico: El juicio del arquitecto como filtro soberano ante la propuesta de la IA.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="img-box">
+                    <!-- Imagen de planificación estratégica -->
+                    <img src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80&w=1200" alt="Agenda de Trabajo Pro">
+                </div>
+            </div>
+        </section>
+
+        <!-- --- TEMA 1: MERMAID --- -->
+        <section id="portada-mermaid">
+            <div class="cover-slide">
+                <div class="cover-text">
+                    <span class="tag" style="color:rgba(255,255,255,0.6)">Tema 01</span>
+                    <h2>Mermaid</h2>
+                    <p>Diagramas como Código (DaC).</p>
+                </div>
+                <div class="cover-img">
+                    <img src="https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&q=80&w=1200" alt="Estructura Abstracta">
+                </div>
+            </div>
+        </section>
+
+        <section id="mermaid-content">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Modelado Pro</span>
+                    <h3>El Lenguaje Nativo de la IA</h3>
+                    <p>Mermaid se ha consolidado como el estándar de oro para el modelado con IA por una razón técnica fundamental: los LLMs operan sobre tokens textuales de manera nativa. Al utilizar Mermaid, el arquitecto puede describir un sistema mediante Markdown, permitiendo que la IA genere, edite y mantenga diagramas con una precisión imposible de lograr en herramientas visuales cerradas. <br><br> Este enfoque garantiza que la documentación viva en el mismo repositorio que el software (Git), facilitando la trazabilidad absoluta del diseño estructural. En Algoritmos III, el uso de Mermaid permite que el alumno formalice la lógica de sus grafos o árboles de forma rápida, delegando el renderizado geométrico a la herramienta pero manteniendo el control total sobre la semántica del modelo propuesto. La IA actúa aquí como un traductor de alta fidelidad entre la idea estructural y el grafo visualizado, permitiendo iteraciones de diseño en milisegundos.</p>
+                </div>
+                <div class="card">
+                    <div class="code-window">
+                        <span style="color:#86868b">graph TD</span><br>
+                        &nbsp;&nbsp;A[Arquitecto] -->|Intención| B(Agente IA)<br>
+                        &nbsp;&nbsp;B -->|Markdown| C{Mermaid Render}<br>
+                        &nbsp;&nbsp;C -->|SVG| D[Arquitectura Viva]
+                    </div>
+                    <p style="margin-top:20px; font-size:1.1rem; color: #424245;"><strong>Ventaja Técnica:</strong> Versionalización total del diseño estructural mediante Git, permitiendo auditorías históricas del diseño del sistema sin pérdida de información.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- --- TEMA 2: UML --- -->
+        <section id="portada-uml">
+            <div class="cover-slide" style="background: var(--apple-blue);">
+                <div class="cover-image">
+                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1200" alt="Arquitectura de Sistemas">
+                </div>
+                <div class="cover-text">
+                    <span class="tag" style="color:rgba(255,255,255,0.7)">Tema 02</span>
+                    <h2>Generación UML</h2>
+                    <p>Visualizando la Lógica Estática y Dinámica.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="uml-content">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Abstracción Visual</span>
+                    <h3>Clases, Secuencia y Estado</h3>
+                    <p>La generación de diagramas UML mediante IA permite identificar patrones de diseño (ej. Factory, Observer) directamente desde requerimientos ambiguos en lenguaje natural. El modelo identifica atributos, métodos y, fundamentalmente, las relaciones de herencia y composición necesarias para cumplir con los principios SOLID. <br><br> Los diagramas de secuencia capturan la interacción temporal analizando el flujo de mensajes en una consulta API o una llamada recursiva en Algoritmos III. Al pedirle a la IA: "Genera el diagrama de secuencia del proceso de balanceo de un Árbol Rojo-Negro", el modelo predice los pasos lógicos, las guardas y las respuestas de error. <br><br> Esta capacidad reduce el "time-to-blueprint" de horas a milisegundos, asegurando que el ingeniero pueda validar la robustez de la arquitectura antes de escribir la primera línea de código ejecutable. La IA no solo dibuja; razona sobre la consistencia del flujo lógico y advierte sobre estados inalcanzables o acoplamientos peligrosos en la estructura del sistema.</p>
+                </div>
+                <div class="img-box">
+                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200" alt="Microchips y Lógica">
+                </div>
+            </div>
+        </section>
+
+        <!-- --- TEMA: EL FLUJO MAESTRO (SOLICITADO COMO TEXTO) --- -->
+        <section id="flujo-maestro">
+            <div class="slide-content full-width">
+                <span class="tag">Arquitectura Técnica de Inferencia</span>
+                <h2>Ciclo Crítico del Token: Editor ↔ Agente ↔ Hardware</h2>
+                
+                <div class="arch-grid">
+                    <!-- Layer 1: Usuario -->
+                    <div class="arch-layer">
+                        <h4>Entorno VS Code (Usuario)</h4>
+                        <div class="step-item">
+                            <strong>1. Intención Algorítmica</strong>
+                            <span>El desarrollador posiciona el cursor o invoca @codebase iniciando la solicitud semántica.</span>
+                        </div>
+                        <div class="step-item">
+                            <strong>9. Inserción de Ghost Text</strong>
+                            <span>El ciclo se cierra con la visualización asíncrona de la solución en el buffer del editor.</span>
+                        </div>
+                    </div>
+                    <!-- Layer 2: Orquestación -->
+                    <div class="arch-layer">
+                        <h4>Orquestación Lógica (Agente)</h4>
+                        <div class="step-item">
+                            <strong>2. Análisis AST / LSP</strong>
+                            <span>Continue analiza el Árbol Sintáctico Abstracto para entender tipos y dependencias.</span>
+                        </div>
+                        <div class="step-item">
+                            <strong>3. Búsqueda Vectorial</strong>
+                            <span>Los Embeddings Locales filtran el contexto relevante del proyecto en milisegundos.</span>
+                        </div>
+                        <div class="step-item">
+                            <strong>4. Constructor de Prompt</strong>
+                            <span>Se inyecta el contexto seleccionado en una estructura técnica optimizada para el modelo.</span>
+                        </div>
+                    </div>
+                    <!-- Layer 3: Inferencia -->
+                    <div class="arch-layer">
+                        <h4>Motor Local (Hardware)</h4>
+                        <div class="step-item">
+                            <strong>5. HTTP JSON / 11434</strong>
+                            <span>Comunicación vía API REST local con el servidor de inferencia Ollama.</span>
+                        </div>
+                        <div class="step-item">
+                            <strong>6. Load Weights</strong>
+                            <span>Carga dinámica de tensores y pesos GGUF desde el almacenamiento a la VRAM.</span>
+                        </div>
+                        <div class="step-item">
+                            <strong>7. Token Prediction</strong>
+                            <span>Inferencia probabilística para generar la secuencia de tokens de respuesta.</span>
+                        </div>
+                        <div class="step-item">
+                            <strong>8. Stream de Texto</strong>
+                            <span>Envío parcial de resultados para reducir la percepción de latencia en el IDE.</span>
+                        </div>
+                    </div>
+                </div>
+                <p style="margin-top:30px; font-weight:700; color: var(--apple-blue);">Este flujo garantiza la soberanía técnica: el dato nunca abandona el perímetro local del hardware.</p>
+            </div>
+        </section>
+
+        <!-- --- TEMA 3: INGENIERÍA INVERSA --- -->
+        <section id="portada-inversa">
+            <div class="cover-slide">
+                <div class="cover-text">
+                    <span class="tag" style="color:rgba(255,255,255,0.6)">Tema 03</span>
+                    <h2>Ingeniería Inversa</h2>
+                    <p>Del Código Fuente al Modelo Visual Inteligente.</p>
+                </div>
+                <div class="cover-img">
+                    <img src="https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&q=80&w=1200" alt="Nodos de Datos">
+                </div>
+            </div>
+        </section>
+
+        <section id="inversa-content">
+            <div class="slide-content">
+                <div class="text-side">
+                    <span class="tag">Arqueología de Software</span>
+                    <h3>Extracción de Arquitectura de Sistemas Heredados</h3>
+                    <p>La ingeniería inversa asistida por IA permite documentar sistemas legacy de millones de líneas de código en segundos. Alimentando a la IA con archivos fuente complejos, el modelo puede abstraer la lógica oculta y devolver un diagrama Mermaid de clases o de secuencia que explique el comportamiento real del sistema. <br><br> Este proceso no es una simple traducción sintáctica; es un análisis de intención donde la IA "entiende" el propósito de las funciones y los acoplamientos entre módulos que a menudo no están documentados. <br><br> En nuestra cátedra de Algoritmos III, esta técnica es vital para visualizar la estructura de bibliotecas externas o entender arquitecturas heredadas sobre las que se debe realizar una refactorización crítica. La IA actúa como un extractor de arquitectura de alta fidelidad, permitiendo que el ingeniero vea "el bosque" del sistema sin perderse en "los árboles" de la implementación de bajo nivel, facilitando auditorías de seguridad y optimizaciones de performance de manera visualmente coherente e inmediata.</p>
+                </div>
+                <div class="img-box">
+                    <!-- Imagen de arquitectura digital moderna corregida -->
+                    <img src="https://images.unsplash.com/photo-1639322537228-f710d846310a?auto=format&fit=crop&q=80&w=1200" alt="Arquitectura Digital Moderna">
+                </div>
+            </div>
+        </section>
+
+        <!-- --- TEMA 4: VALIDACIÓN CRÍTICA --- -->
+        <section id="portada-validacion">
+            <div class="cover-slide" style="background: var(--apple-gray);">
+                <div class="cover-image">
+                    <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&q=80&w=1200" alt="Hardware Pro">
+                </div>
+                <div class="cover-text">
+                    <span class="tag" style="color:rgba(255,255,255,0.7)">Tema 04</span>
+                    <h2>Validación Crítica</h2>
+                    <p>Soberanía del Arquitecto frente a la Propuesta IA.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="validacion-content">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Auditoría Humana</span>
+                    <h3>El Juicio frente a la Estocasticidad</h3>
+                    <p>La IA es un ejecutor excelente pero un diseñador estocástico. El arquitecto de software debe ejercer una validación crítica sobre cada diagrama generado, cuestionando si el modelo propuesto es el más eficiente o simplemente el más probable estadísticamente según los pesos del modelo. <br><br> La IA tiende a la sobre-ingeniería o a ignorar restricciones de dominio específicas que solo el humano conoce mediante su experiencia contextual. Validar un diseño implica verificar que no existan ciclos de dependencia, que el nivel de acoplamiento sea bajo y que la cohesión sea máxima. <br><br> Sin este filtro crítico, el diseño asistido puede conducir a arquitecturas frágiles que se desmoronan ante requerimientos no funcionales de performance o escalabilidad masiva. El ingeniero exitoso utiliza la IA para iterar diseños en segundos, pero elige el camino final basado en la ética, la mantenibilidad y el propósito último del sistema humano. La IA aporta la velocidad, pero el humano aporta la **Soberanía del Criterio**.</p>
+                </div>
+                <div class="card">
+                    <h3>Matriz de Soberanía Técnica</h3>
+                    <table style="width:100%; border-collapse: collapse; margin-top:20px;">
+                        <tr style="border-bottom: 1px solid #ddd;">
+                            <th style="padding:15px; text-align:left;">Atributo</th>
+                            <th style="padding:15px; text-align:left;">Humano</th>
+                            <th style="padding:15px; text-align:left;">IA</th>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding:15px;">Velocidad</td>
+                            <td style="padding:15px;">Baja</td>
+                            <td style="padding:15px; color:var(--apple-blue);">Instantánea</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #eee;">
+                            <td style="padding:15px;">Criterio Ético</td>
+                            <td style="padding:15px; color:var(--apple-blue);">Absoluto</td>
+                            <td style="padding:15px;">Nulo</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:15px;">Abstracción</td>
+                            <td style="padding:15px; color:var(--apple-blue);">Consciente</td>
+                            <td style="padding:15px;">Probabilística</td>
+                        </tr>
+                    </table>
+                    <p style="margin-top:20px; font-size:1rem; color:var(--apple-gray);"><strong>Conclusión:</strong> El diseño generado por IA es un borrador inteligente; el diseño final es siempre una decisión soberana.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- S16: CIERRE SANKALPA -->
+        <section id="cierre">
+            <div class="slide-content full-width">
+                <span class="tag">Jose Luis Oemig / Sankalpa</span>
+                <h1>Diseñar con Intención</h1>
+                <div class="img-box" style="height: 300px; max-width: 650px; margin: 30px auto; border-radius: 50%;">
+                    <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=1200" alt="Equilibrio Zen">
+                </div>
+                <div style="max-width: 850px; margin: 0 auto; text-align: center;">
+                    <p>Modelar software es un acto de orden mental profundo. Un diseño alineado con tu **Sankalpa** (intención consciente) permite que la complejidad técnica se transforme en armonía sistémica. La IA es el pincel, Mermaid el lienzo, pero la claridad del sistema nace siempre de la quietud y el propósito de tu pensamiento arquitectónico.</p>
+                    <div style="margin-top: 40px; font-weight: 800; font-size: 1.5rem; background: var(--gemini-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        "Donde hay orden en el modelo, hay paz en la ejecución del algoritmo."
+                    </div>
+                </div>
+                <button onclick="scrollToId('intro')" style="margin-top: 50px; padding:15px 40px; border-radius:30px; border:none; background:var(--apple-black); color:white; font-weight:700; cursor:pointer;">Reiniciar Masterclass</button>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- Gemini Floating Consultant -->
+    <div class="gemini-btn" onclick="toggleModal()"><i data-lucide="sparkles"></i></div>
+
+    <!-- Modal Gemini -->
+    <div id="geminiModal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; font-size:1.6rem;"><i data-lucide="bot" style="vertical-align:middle; margin-right:12px; color:var(--apple-blue);"></i> Consultor Socrático</h2>
+                <i data-lucide="x" onclick="toggleModal()" style="cursor:pointer; opacity:0.3;"></i>
+            </div>
+            <p style="color:var(--apple-gray); margin-top:10px;">Consulta técnica sobre modelado UML y Mermaid asistido por IA.</p>
+            <input type="text" id="chatInput" placeholder="Ej: ¿Cómo pido un diagrama de secuencia de un login?" onkeypress="if(event.key==='Enter') askGemini()">
+            <button onclick="askGemini()" id="sendBtn" style="width:100%; padding:18px; border-radius:15px; border:none; background:var(--apple-blue); color:white; font-weight:700; cursor:pointer;">Consultar a Gemini</button>
+            <div id="chatResponse" style="margin-top:20px; display:none; background:#f5f5f7; padding:20px; border-radius:15px; max-height:350px; overflow-y:auto; text-align:left;"></div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Presentation Logic
+        const deck = document.getElementById('deck');
+        const sections = document.querySelectorAll('section');
+        const dotNav = document.getElementById('dotNav');
+
+        sections.forEach((s, i) => {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.dataset.target = s.id;
+            dot.onclick = () => scrollToId(s.id);
+            dotNav.appendChild(dot);
+        });
+
+        function scrollToId(id) {
+            const target = document.getElementById(id);
+            deck.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+        }
+
+        deck.addEventListener('scroll', () => {
+            let current = "";
+            sections.forEach(s => { if (deck.scrollTop >= s.offsetTop - 100) current = s.id; });
+            sections.forEach(s => s.classList.toggle('visible', s.id === current));
+            document.querySelectorAll('.dot').forEach(d => d.classList.toggle('active', d.dataset.target === current));
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${current}`));
+        });
+
+        // Gemini API Configuration
+        const apiKey = ""; 
+        const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+
+        async function apiCall(prompt, system) {
+            try {
+                const res = await fetch(`${ENDPOINT}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        systemInstruction: { parts: [{ text: system }] }
+                    })
+                });
+                const data = await res.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch(e) { return "Error de conexión técnica."; }
+        }
+
+        function toggleModal() {
+            const m = document.getElementById('geminiModal');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+            if(m.style.display === 'flex') document.getElementById('chatInput').focus();
+        }
+
+        async function askGemini() {
+            const i = document.getElementById('chatInput');
+            const r = document.getElementById('chatResponse');
+            const btn = document.getElementById('sendBtn');
+            const q = i.value.trim();
+            if(!q) return;
+
+            btn.disabled = true; btn.innerHTML = 'Razonando<span class="loader"></span>';
+            r.style.display = 'block'; r.innerHTML = '<em>Consultando la base universitaria...</em>';
+
+            const system = `Eres Jose Luis Oemig, docente de Algoritmos III. Resume los temas del Módulo 4 de forma técnica y socrática.
+            Explica Mermaid, UML con IA e ingeniería inversa con rigor profesional y un enfoque en la soberanía técnica del arquitecto.`;
+
+            try {
+                const text = await apiCall(q, system);
+                r.innerText = text;
+            } catch (e) { r.innerText = "Error."; }
+            finally { btn.disabled = false; btn.innerText = "Consultar a Gemini"; }
+        }
+
+        sections[0].classList.add('visible');
+    </script>
+</body>
+</html>

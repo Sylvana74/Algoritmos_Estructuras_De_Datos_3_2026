@@ -1,0 +1,8 @@
+hito 4 
+Les comento que nuestro cliente manifiesta que desea agregar al ticket el producto y el tipo de producto, dado que va a comenzar a "Especializar" los técnicos por Rubro, linea blanca, cocina, electro, pequeños electrodomésticos.
+
+Por tal motivo se  pide modificar los requerimientos y el diagrama de clase a fin de contener este cambio.
+Espero los producidos.
+
+Un abrazo.
+José Luis.

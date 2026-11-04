@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AED III - Módulo 6: IA en Testing y Validación Pro</title>
+    <!-- Bibliotecas y Fuentes -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --apple-black: #1d1d1f;
+            --apple-gray: #86868b;
+            --apple-blue: #0071e3;
+            --apple-bg: #ffffff;
+            --apple-light-gray: #f5f5f7;
+            --gemini-gradient: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+            --transition-speed: 1s;
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body, html {
+            margin: 0; padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-black);
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* Presentation Engine */
+        .presentation-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+            scroll-behavior: smooth;
+        }
+
+        section {
+            height: 100vh;
+            width: 100vw;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+            position: relative;
+            background: white;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* Nav Modernista Centrada */
+        nav {
+            position: fixed; top: 0; width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .nav-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 40px; height: 60px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .nav-logo { font-weight: 900; font-size: 1rem; letter-spacing: -0.02em; }
+        .nav-links { display: flex; gap: 25px; }
+        .nav-links a {
+            text-decoration: none; color: var(--apple-black); font-size: 0.75rem;
+            font-weight: 600; opacity: 0.5; transition: 0.3s;
+        }
+        .nav-links a.active { opacity: 1; color: var(--apple-blue); }
+
+        /* Progress Dots */
+        .dots-menu {
+            position: fixed; right: 40px; top: 50%; transform: translateY(-50%);
+            display: flex; flex-direction: column; gap: 15px; z-index: 1000;
+        }
+        .dot {
+            width: 8px; height: 8px; border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 50%; cursor: pointer; transition: 0.4s;
+        }
+        .dot.active { background: var(--apple-blue); transform: scale(1.8); }
+
+        /* Footer */
+        .slide-footer {
+            position: absolute; bottom: 25px; left: 0; width: 100%;
+            text-align: center; font-size: 0.65rem; color: var(--apple-gray);
+            font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+        }
+
+        /* Content Transitions Engine */
+        .slide-content {
+            max-width: 1050px; width: 100%;
+            display: flex; flex-direction: column;
+            align-items: center;
+            opacity: 0;
+            transition: all 1.2s cubic-bezier(0.19, 1, 0.22, 1);
+        }
+
+        /* Clases de Animación Dinámica (Se asignan vía JS) */
+        .trans-zoom { transform: scale(0.85); }
+        .trans-up { transform: translateY(80px); }
+        .trans-down { transform: translateY(-80px); }
+        .trans-left { transform: translateX(-80px); }
+        .trans-right { transform: translateX(80px); }
+        .trans-flip { transform: perspective(1000px) rotateX(-20deg); }
+
+        section.visible .slide-content { opacity: 1; transform: none !important; }
+
+        /* Typography */
+        h1 { font-size: clamp(2.2rem, 7vw, 4.5rem); font-weight: 900; letter-spacing: -0.06em; line-height: 1; margin: 0; }
+        h2 { font-size: 2.8rem; font-weight: 800; letter-spacing: -0.04em; margin-bottom: 25px; line-height: 1.1; }
+        h3 { font-size: 1.5rem; font-weight: 700; color: var(--apple-blue); margin-bottom: 15px; }
+        p { font-size: 1.15rem; line-height: 1.8; color: #3a3a3c; max-width: 900px; margin: 0 auto; text-align: center; }
+
+        .tag {
+            text-transform: uppercase; font-size: 0.75rem; font-weight: 800;
+            letter-spacing: 0.25em; color: var(--apple-gray); margin-bottom: 20px; display: block;
+        }
+
+        /* Estética Pro */
+        .card {
+            background: var(--apple-light-gray); border-radius: 44px; padding: 50px;
+            border: 1px solid rgba(0,0,0,0.02); width: 100%; max-width: 950px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.02); margin-top: 20px;
+            text-align: center;
+        }
+
+        .img-wrapper {
+            width: 100%; max-width: 900px; height: 420px; border-radius: 50px;
+            overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,0.08);
+            margin: 30px auto; background: #f0f0f2;
+        }
+        .img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+        /* ARCHITECTURE GRID (TEXTUAL) */
+        .arch-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 25px; width: 100%; margin-top: 40px;
+        }
+        .arch-box {
+            background: #fff; border: 1px solid #e5e5e7; border-radius: 32px;
+            padding: 30px; text-align: left; transition: 0.3s;
+        }
+        .arch-box h4 { font-size: 0.8rem; color: var(--apple-gray); margin-bottom: 15px; border-bottom: 1px solid #f2f2f7; padding-bottom: 12px; text-transform: uppercase; }
+        .step { margin-bottom: 15px; border-left: 3px solid var(--apple-blue); padding-left: 15px; }
+        .step strong { display: block; font-size: 1.05rem; margin-bottom: 4px; color: var(--apple-black); }
+        .step span { font-size: 0.9rem; color: #666; display: block; line-height: 1.4; }
+
+        .code-window {
+            background: #1e1e1e; color: #d4d4d4; padding: 30px;
+            border-radius: 28px; font-family: 'Fira Code', monospace;
+            font-size: 0.9rem; text-align: left; box-shadow: 0 40px 80px rgba(0,0,0,0.2);
+            width: 100%; max-width: 800px; margin: 20px auto;
+        }
+
+        /* Gemini Interface */
+        .gemini-btn {
+            position: fixed; bottom: 40px; right: 40px; background: var(--gemini-gradient);
+            width: 72px; height: 72px; border-radius: 50%; display: flex; justify-content: center;
+            align-items: center; color: white; cursor: pointer; box-shadow: 0 15px 45px rgba(0,0,0,0.2);
+            z-index: 2000; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .gemini-btn:hover { transform: scale(1.1) rotate(5deg); }
+
+        #geminiModal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(30px); z-index: 3000;
+            justify-content: center; align-items: center;
+        }
+        .modal-card { background: white; width: 90%; max-width: 850px; border-radius: 45px; padding: 50px; position: relative; }
+        #chatInput { width: 100%; padding: 24px; border: 1px solid #d2d2d7; border-radius: 20px; font-size: 1.1rem; outline: none; margin: 25px 0; background: #fbfbfd; }
+        #chatResponse { background: #f5f5f7; padding: 30px; border-radius: 25px; max-height: 350px; overflow-y: auto; text-align: left; line-height: 1.8; }
+
+        .loader:after { content: '...'; animation: load 1.5s infinite; }
+        @keyframes load { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+
+        @media (max-width: 1100px) {
+            .arch-grid { grid-template-columns: 1fr; }
+            section { padding: 80px 30px; }
+            h2 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <div class="nav-container">
+            <div class="nav-logo"> AED III - Módulo 6: Calidad Aumentada </div>
+            <div class="nav-links">
+                <a href="#hero">Apertura</a>
+                <a href="#evolucion">Evolución</a>
+                <a href="#roadmap">Hoja de Ruta</a>
+                <a href="#gen-theory">Escritura</a>
+                <a href="#complexity">Análisis</a>
+                <a href="#competencias">Competencias</a>
+                <a href="#cierre">Sankalpa</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="dots-menu" id="dotNav"></div>
+
+    <div class="presentation-container" id="deck">
+        
+        <!-- S1: HERO -->
+        <section id="hero">
+            <div class="slide-content">
+                <span class="tag">Unidad 7.6 · Ingeniería de Calidad Industrial</span>
+                <h1>Testing y Validación con IA</h1>
+                <p>Del aseguramiento reactivo a la validación proactiva: Cómo orquestar la inteligencia artificial local para construir sistemas resilientes y soberanos.</p>
+                <div class="img-wrapper">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1200" alt="Código de Calidad">
+                </div>
+            </div>
+            <div class="slide-footer">Introducción a la Soberanía en QA</div>
+        </section>
+
+        <!-- S2: EVOLUCIÓN (TEXTO DENSO) -->
+        <section id="evolucion">
+            <div class="slide-content">
+                <span class="tag">Marco Conceptual Universitario</span>
+                <h2>La IA en la Validación del Software</h2>
+                <p>La inteligencia artificial ha mutado de ser un simple generador de fragmentos aislados para convertirse en el **eje vertebrador del diseño de software moderno**. En esta unidad, exploraremos cómo la IA local redefine el modelado técnico: no se trata solo de escribir código, sino de utilizar la capacidad de razonamiento probabilístico para validar diseños, detectar acoplamientos innecesarios y documentar sistemas complejos en segundos. <br><br> La verdadera revolución no reside en la automatización mecánica, sino en la **elevación del nivel de abstracción del ingeniero**. Ya no luchamos contra la sintaxis; pilotamos intenciones arquitectónicas complejas. A lo largo de este módulo, aprenderemos que los modelos locales garantizan la soberanía de los datos, permitiendo una trazabilidad total desde el requerimiento abstracto hasta el binario ejecutable y optimizado bajo el juicio del experto soberano que audita cada línea generada.</p>
+                <div class="card" style="background: white; border: 1px solid #eee; margin-top:20px;">
+                    <p style="font-weight: 700; text-align: center; color: var(--apple-blue);">El ingeniero actual es un auditor de calidad que garantiza que la velocidad no degrade la integridad sistémica.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Evolución del Ciclo de Vida de Pruebas</div>
+        </section>
+
+        <!-- S3: HOJA DE RUTA EXPANDIDA -->
+        <section id="roadmap">
+            <div class="slide-content">
+                <span class="tag">Hitos de Aprendizaje</span>
+                <h2>Mapa Maestro de Validación</h2>
+                <div class="img-wrapper" style="height: 250px; margin-bottom: 20px;">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1507413245164-6160d8298b31?auto=format&fit=crop&q=80&w=1200" alt="Planificación Maestro">
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%;">
+                    <div class="card" style="padding: 20px; background: white; border: 1px solid #f2f2f7;" onclick="scrollToId('gen-theory')">
+                        <h3>1. Inferencia de Tests</h3>
+                        <p style="font-size: 0.95rem;">Transpilación de especificaciones a suites de GTest y PyTest dinámicas y desacopladas.</p>
+                    </div>
+                    <div class="card" style="padding: 20px; background: white; border: 1px solid #f2f2f7;" onclick="scrollToId('complexity')">
+                        <h3>2. Auditoría de Bordes</h3>
+                        <p style="font-size: 0.95rem;">Identificación de puntos de falla improbables y stress testing de estructuras de datos masivas.</p>
+                    </div>
+                    <div class="card" style="padding: 20px; background: white; border: 1px solid #f2f2f7;" onclick="scrollToId('competencias')">
+                        <h3>3. Cobertura Semántica</h3>
+                        <p style="font-size: 0.95rem;">Diferenciación entre cobertura de código cosmética y validación real de invariantes lógicos.</p>
+                    </div>
+                    <div class="card" style="padding: 20px; background: white; border: 1px solid #f2f2f7;" onclick="scrollToId('human-audit')">
+                        <h3>4. Soberanía de QA</h3>
+                        <p style="font-size: 0.95rem;">El criterio del arquitecto como filtro final ante la estocasticidad del modelo de lenguaje.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-footer">Mapa Detallado de Competencias del Módulo 6</div>
+        </section>
+
+        <!-- S4: PORTADA GENERACIÓN -->
+        <section id="gen-main">
+            <div class="slide-content">
+                <span class="tag">Módulo 01</span>
+                <h1>Escritura de Tests</h1>
+                <p>De la Intención Funcional a la Aserción Técnica Automatizada.</p>
+                <div class="img-wrapper">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&q=80&w=1200" alt="Geometría Fractal">
+                </div>
+            </div>
+            <div class="slide-footer">Inferencia y Transpilación Semántica de Pruebas</div>
+        </section>
+
+        <!-- S5: GENERACIÓN CONCEPTOS (TEXTO DENSO) -->
+        <section id="gen-theory">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Mecánica de Calidad</span>
+                    <h3>Inferencia de Aserciones desde Especificaciones</h3>
+                    <p>La generación de casos de prueba asistida por IA es una extensión directa del análisis semántico del código fuente. Al invocar el contexto con `@codebase`, el agente local analiza precondiciones, postcondiciones e invariantes de clase para proponer entradas que maximicen el Code Coverage de forma inteligente. <br><br> Este proceso no solo genera datos de prueba, sino que construye la orquestación completa de Mocks y aserciones basadas en el comportamiento esperado. Sin embargo, el ingeniero debe proveer una especificación técnica clara; si el código original posee deudas lógicas, la IA podría generar tests que validen un comportamiento erróneo (el peligro del falso positivo). En Algoritmos III, esta capacidad permite crear de forma instantánea tests de regresión para estructuras como Árboles B o Grafos, asegurando que cada nueva rotación o inserción mantenga la integridad estructural previa de manera impecable y profesional.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Escritura de Pruebas Unitarias con Soberanía Técnica</div>
+        </section>
+
+        <!-- S6: EJEMPLO C++ GTEST -->
+        <section id="gen-cpp">
+            <div class="slide-content">
+                <span class="tag">Caso Práctico en C++</span>
+                <h2>Google Test con Inferencia Local</h2>
+                <p>Auditamos la robustez de un **Grafo Dirigido**. El ingeniero define la lógica de Dijkstra; la IA genera la suite de pruebas para caminos mínimos y nodos desconectados.</p>
+                <div class="code-window">
+<pre style="margin:0;"><span style="color:#6a9955">// Prompt: Genera tests para Dijkstra en Graph.h</span>
+<span style="color:#dcdcaa">TEST</span>(GraphTest, ShortestPathValidation) {
+    Graph g; g.addEdge(0, 1, 10); g.addEdge(1, 2, 5);
+    <span style="color:#c586c0">auto</span> dist = g.dijkstra(0, 2);
+    <span style="color:#c586c0">EXPECT_EQ</span>(dist, 15);
+    <span style="color:#6a9955">// IA genera aserciones para ciclos negativos...</span>
+}</pre>
+                </div>
+                <div class="card" style="margin-top:20px; padding:25px;">
+                    <p style="font-size:0.95rem;"><strong>Checklist:</strong> El humano debe validar si el test contempla desbordamientos en el cálculo de distancias (infinitos) o si se maneja correctamente la excepción de nodo no encontrado bajo carga.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Validación Humana de Inferencia en GTest</div>
+        </section>
+
+        <!-- S7: PORTADA COMPLEJIDAD -->
+        <section id="complexity">
+            <div class="slide-content">
+                <span class="tag">Módulo 02</span>
+                <h1>Auditoría de Bordes</h1>
+                <p>Identificación de Condiciones Críticas mediante Razonamiento Probabilístico.</p>
+                <div class="img-wrapper">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80&w=1200" alt="Hardware de Calidad">
+                </div>
+            </div>
+            <div class="slide-footer">Buscando lo Improbable con Inteligencia Local</div>
+        </section>
+
+        <!-- S8: CASOS DE BORDE (TEXTO DENSO) -->
+        <section id="edge-theory">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Análisis de Resiliencia</span>
+                    <h3>El 'Uncanny Valley' del Código</h3>
+                    <p>La IA brilla donde la atención humana flaquea: en los extremos del dominio de datos. Un "Caso de Borde" incluye desde el manejo de punteros nulos en C++ hasta el desbordamiento de enteros o la inserción en estructuras vacías. <br><br> Al interrogar al modelo con comandos como: "Propón 5 casos de borde que rompan este algoritmo de recorrido de grafos", la IA explora escenarios como grafos cíclicos, desconectados o con pesos negativos que el alumno podría haber ignorado en su diseño inicial. <br><br> Este análisis proactivo garantiza que el software sea resiliente ante lo imprevisto. En nuestra cátedra, el éxito no es que el algoritmo ordene una lista pequeña; es que no falle cuando la lista tiene 0 elementos o 1 millón de elementos duplicados. La IA actúa como un "Red Team" de calidad, estresando constantemente la robustez de las invariantes algorítmicas diseñadas por el estudiante antes de la evaluación final del sistema industrial.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Detección de Puntos de Falla Críticos en Tiempo Real</div>
+        </section>
+
+        <!-- S9: PORTADA COBERTURA -->
+        <section id="coverage">
+            <div class="slide-content">
+                <span class="tag">Módulo 03</span>
+                <h1>Cobertura Semántica</h1>
+                <p>Diferenciando el Porcentaje de Líneas de la Validación de Invariantes.</p>
+                <div class="img-wrapper">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80&w=1200" alt="Conocimiento Soberano">
+                </div>
+            </div>
+            <div class="slide-footer">Calidad sobre Cantidad en la Suite de Pruebas</div>
+        </section>
+
+        <!-- S10: EL FLUJO MAESTRO DE TESTING (TEXTUAL) -->
+        <section id="testing-flow">
+            <div class="slide-content full-width">
+                <span class="tag">Arquitectura del Test</span>
+                <h2>Ciclo Crítico de QA: Editor ↔ Agente ↔ Hardware</h2>
+                <div class="arch-grid">
+                    <div class="arch-box">
+                        <h4>Usuario (VS Code)</h4>
+                        <div class="step"><strong>1. Intención de QA</strong><span>El ingeniero selecciona la unidad a testear e invoca @codebase.</span></div>
+                        <div class="step"><strong>9. Ejecución Terminal</strong><span>Llamada al comando de ejecución y visualización de resultados DIFF.</span></div>
+                    </div>
+                    <div class="arch-box">
+                        <h4>Orquestación (Agent)</h4>
+                        <div class="step"><strong>2. Análisis AST</strong><span>Análisis del árbol sintáctico para identificar tipos y firmas reales.</span></div>
+                        <div class="step"><strong>3. Ingesta de Mocks</strong><span>Filtro de dependencias externas mediante RAG local de alta fidelidad.</span></div>
+                        <div class="step"><strong>4. Prompt Build</strong><span>Construcción de la estrategia de prueba (Normal, Error, Edge Case).</span></div>
+                    </div>
+                    <div class="arch-box">
+                        <h4>Motor (Ollama)</h4>
+                        <div class="step"><strong>5. HTTP 11434</strong><span>Comunicación asíncrona con el servidor de inferencia local.</span></div>
+                        <div class="step"><strong>6. VRAM Load</strong><span>Carga dinámica de tensores específicos para el framework (GTest).</span></div>
+                        <div class="step"><strong>7. Predict & Stream</strong><span>Inferencia probabilística y envío parcial de tokens al IDE.</span></div>
+                    </div>
+                </div>
+                <p style="margin-top:30px; font-weight:700; color: var(--apple-blue);">Este ciclo garantiza la soberanía técnica: el dato de prueba jamás abandona tu hardware local.</p>
+            </div>
+            <div class="slide-footer">Arquitectura de Inferencia en 9 Pasos Centrados</div>
+        </section>
+
+        <!-- S11: SUPERFICIAL VS SIGNIFICATIVO (TEXTO DENSO) -->
+        <section id="shallow-sig">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Auditoría de Calidad</span>
+                    <h3>Tests Significativos vs Superficiales</h3>
+                    <p>Un error común en el uso de IA es generar cientos de tests "superficiales" que solo validan que el código no explote (Smoke Tests), pero que no verifican que la lógica de negocio sea correcta. Un test superficial puede marcar un 100% de cobertura pero no haber probado ninguna transición de estado crítica del objeto o la consistencia de los datos persistidos. <br><br> Un **Test Significativo** es aquel que valida una regla de negocio o una invariante estructural compleja. El arquitecto debe auditar las sugerencias de la IA buscando tests que realmente "duelan" al sistema, poniendo a prueba el manejo de memoria y la concurrencia. En Algoritmos III, exigimos que los tests no solo pasen, sino que demuestren que el Árbol B mantiene su grado mínimo tras una eliminación compleja. No buscamos cantidad de aserciones estadísticas, buscamos aserciones lógicas que protejan la arquitectura del software de forma soberana.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Validación de Invariantes Estructurales Complejas</div>
+        </section>
+
+        <!-- S12: PORTADA LIMITACIONES -->
+        <section id="limit-main">
+            <div class="slide-content">
+                <span class="tag">Módulo 04</span>
+                <h1>Limitaciones de la IA</h1>
+                <p>Por qué la Inferencia Probabilística no puede ser el Juez Final.</p>
+                <div class="img-wrapper">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=1200" alt="Límites Técnicos">
+                </div>
+            </div>
+            <div class="slide-footer">Entendiendo las Fronteras de la Inferencia Probabilística</div>
+        </section>
+
+        <!-- S13: LIMITACIONES (TEXTO DENSO) -->
+        <section id="limit-theory">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Análisis Crítico</span>
+                    <h3>Alucinaciones y Dependencias de Entorno</h3>
+                    <p>La IA en testing padece de dos debilidades fundamentales: la Alucinación de Mocks y el Desconocimiento del Entorno Físico. Un modelo puede generar un test perfecto que utiliza una biblioteca que no existe o simula un puerto de hardware que el sistema real no posee. <br><br> Además, la IA tiende a ser optimista: asume que el sistema operativo siempre responderá a tiempo, ignorando condiciones de carrera (Race Conditions) reales que solo el humano puede prever basándose en su experiencia con sistemas concurrentes. Otra limitación es la falta de contexto ético; la IA no sabe si un fallo en un test de acceso a datos es un error menor o una vulnerabilidad de seguridad crítica. El ingeniero de AED III debe ser consciente de que la IA es una herramienta de escritura, no de decisión soberana. Aceptar una suite de pruebas sin auditoría es abrir la puerta a una falsa sensación de seguridad técnica que colapsará en entornos productivos industriales.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Riesgos de la Automatización Ciega en QA</div>
+        </section>
+
+        <!-- S14: PORTADA AUDITORÍA HUMANA -->
+        <section id="human-audit">
+            <div class="slide-content">
+                <span class="tag">Módulo 05</span>
+                <h1>Auditoría Humana</h1>
+                <p>El Ingeniero como Filtro Ético y Arquitectónico Obligatorio.</p>
+                <div class="img-wrapper">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1563986768609-322da13575f3?auto=format&fit=crop&q=80&w=1200" alt="Seguridad Digital">
+                </div>
+            </div>
+            <div class="slide-footer">La Soberanía Técnica en la Aprobación del Cambio</div>
+        </section>
+
+        <!-- S15: AUDITORÍA (TEXTO DENSO) -->
+        <section id="audit-theory">
+            <div class="slide-content">
+                <div class="card">
+                    <span class="tag">Human-in-the-loop</span>
+                    <h3>Validación Obligatoria del Experto</h3>
+                    <p>En el Módulo 6, establecemos la Validación Humana Obligatoria como ley fundamental de la cátedra. Ningún test generado por IA debe ser integrado al repositorio sin una revisión socrática por parte del arquitecto. Esta revisión busca responder tres preguntas: ¿El test valida la intención real del requerimiento? ¿Es mantenible por otros humanos? ¿Identifica el origen del error de forma clara? <br><br> El rol del ingeniero ha evolucionado hacia el de un **Curador de Calidad**. Delegamos la redacción tediosa del test, pero mantenemos la soberanía sobre el criterio de éxito. En Algoritmos III, esta práctica se traduce en la capacidad del alumno para defender sus tests ante la cátedra: si no puedes explicar por qué un test generado falló o qué invariante está protegiendo, entonces no eres tú quien está diseñando el sistema. La IA es el acelerador, pero tu consciencia y rigor técnico son el sistema de dirección que garantiza que el software sea profesional, ético y seguro bajo cualquier carga.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Responsabilidad Ética del Desarrollador Aumentado</div>
+        </section>
+
+        <!-- S16: SOBERANÍA INTELECTUAL -->
+        <section id="soberania">
+            <div class="slide-content">
+                <span class="tag">Ética y Autoría</span>
+                <h2>Soberanía del Pensamiento</h2>
+                <div class="img-wrapper" style="height: 300px;">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=1200" alt="Laptop Moderna">
+                </div>
+                <div style="max-width: 850px; margin: 0 auto; text-align: center;">
+                    <p>Delegar el testing a la IA sin validación humana es abdicar de tu responsabilidad profesional como ingeniero. Si un test pasa y no entiendes por qué, has perdido la soberanía técnica sobre tu propia creación algorítmica. La IA es una extensión de tus capacidades, pero la verdad del sistema reside siempre en la quietud de tu propio juicio técnico soberano y consciente.</p>
+                </div>
+            </div>
+            <div class="slide-footer">Responsabilidad Ética y Autoría Intelectual en QA</div>
+        </section>
+
+        <!-- S17: MAESTRÍA AUMENTADA (AMPLIADO - TEXTO DENSO) -->
+        <section id="maestria">
+            <div class="slide-content">
+                <span class="tag">Conclusión Técnica del Módulo</span>
+                <h2>Hacia la Maestría Aumentada</h2>
+                <div class="card" style="background: white; border: 1px solid #f2f2f7; text-align: justify;">
+                    <p>La maestría aumentada en el ámbito del testing no es simplemente saber usar un generador de casos de prueba, sino desarrollar una **visión binocular**: un ojo puesto en el determinismo matemático del hardware y otro en la estocasticidad creativa del modelo de lenguaje autorregresivo. Esta síntesis permite que el arquitecto deje de ser un esclavo de la sintaxis repetitiva para convertirse en un estratega de la resiliencia sistémica integral. <br><br> El ingeniero moderno debe orquestar suites de validación que se adapten a la evolución del software en tiempo real, discerniendo entre la cobertura nominal (número de líneas ejecutadas) y la cobertura semántica (garantía de invariantes estructurales que protegen el dominio). El éxito de un proyecto profesional hoy se mide por la confianza que su suite de validación inspira al equipo humano y al cliente final. Usa la IA para elevar tu nivel de abstracción hacia el diseño estratégico y la validación ética, no para anular tu capacidad primordial de pensamiento lógico. La técnica de testing es el escudo, pero tu propósito consciente es el brazo soberano que lo sostiene frente a la incertidumbre del despliegue masivo en mercados industriales competitivos.</p>
+                </div>
+            </div>
+            <div class="slide-footer">El Rol del Ingeniero en la Era de la Inferencia Masiva</div>
+        </section>
+
+        <!-- S18: COMPETENCIAS DE VALIDACIÓN (AMPLIADO Y REDACTADO) -->
+        <section id="competencias">
+            <div class="slide-content full-width">
+                <span class="tag">Síntesis Técnica Profesional</span>
+                <h1>Competencias de Validación Aumentada</h1>
+                <div class="card" style="text-align: left; background: white; border: 1px solid #eee;">
+                    <p style="margin-bottom: 25px;">El dominio de la Unidad 7.6 exige una amalgama de habilidades que transforman al testeador tradicional en un **Arquitecto de Resiliencia**. Estas competencias no son opcionales en la ingeniería moderna asistida por IA:</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 35px;">
+                        <div>
+                            <h3 style="color:var(--apple-blue);">• Orquestación de Inferencia</h3>
+                            <p style="font-size: 0.95rem;">Capacidad de traducir requerimientos de negocio complejos en prompts técnicos precisos que produzcan suites de GTest/PyTest desacopladas y de alta fidelidad algorítmica.</p>
+                        </div>
+                        <div>
+                            <h3 style="color:var(--apple-blue);">• Detección Proactiva de Bordes</h3>
+                            <p style="font-size: 0.95rem;">Habilidad estratégica para utilizar la IA como un motor de búsqueda de anomalías, identificando estados inalcanzables, fugas de memoria y condiciones de carrera antes de la fase de despliegue crítico.</p>
+                        </div>
+                        <div>
+                            <h3 style="color:var(--apple-blue);">• Auditoría de Cobertura Lógica</h3>
+                            <p style="font-size: 0.95rem;">Criterio experto para diferenciar entre la métrica cosmética de "líneas de código" y la validación real de las invariantes matemáticas que garantizan la estabilidad del sistema bajo carga masiva.</p>
+                        </div>
+                        <div>
+                            <h3 style="color:var(--apple-blue);">• Liderazgo Soberano de QA</h3>
+                            <p style="font-size: 0.95rem;">Responsabilidad ética final sobre la suite de pruebas, asegurando que cada test integrado sea una señal clara de salud sistémica y no un simple ruido estadístico generado por la IA.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="slide-footer">Mapa de Habilidades para el Ingeniero del Siglo XXI</div>
+        </section>
+
+        <!-- S19: CIERRE SANKALPA -->
+        <section id="cierre">
+            <div class="slide-content full-width">
+                <span class="tag">Jose Luis Oemig / Sankalpa</span>
+                <h1>Calidad con Intención</h1>
+                <div class="img-wrapper" style="height: 280px; max-width: 600px; margin: 30px auto; border-radius: 50%;">
+                    <!--  -->
+                    <img src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?auto=format&fit=crop&q=80&w=1200" alt="Equilibrio Sankalpa">
+                </div>
+                <div style="max-width: 850px; margin: 0 auto; text-align: center;">
+                    <p>Validar un software es, en esencia, un acto de orden mental profundo. Un test alineado con tu **Sankalpa** (intención consciente) transforma la complejidad técnica en armonía sistémica. La IA provee la velocidad de validación masiva, pero la paz del despliegue nace siempre de la claridad de tu pensamiento técnico soberano.</p>
+                    <div style="margin-top: 40px; font-weight: 900; font-size: 1.5rem; background: var(--gemini-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
+                        "Donde hay rigor en la validación, hay paz en el despliegue del software."
+                    </div>
+                </div>
+                <button onclick="document.getElementById('deck').scrollTo({top:0, behavior:'smooth'})" style="margin-top: 40px; padding:15px 40px; border-radius:30px; border:none; background:var(--apple-black); color:white; font-weight:700; cursor:pointer;">Reiniciar Masterclass</button>
+            </div>
+            <div class="slide-footer">Soberanía Intelectual y Consciencia Técnica Final</div>
+        </section>
+
+    </div>
+
+    <!-- Gemini assistant -->
+    <div class="gemini-btn" onclick="toggleModal()"><i data-lucide="sparkles"></i></div>
+
+    <div id="geminiModal">
+        <div class="modal-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <h2 style="margin:0; font-size:1.6rem;"><i data-lucide="bot" style="vertical-align:middle; margin-right:12px; color:var(--apple-blue);"></i> Consultor Académico</h2>
+                <i data-lucide="x" onclick="toggleModal()" style="cursor:pointer; opacity:0.3;"></i>
+            </div>
+            <p style="color:var(--apple-gray); margin-top:10px;">Consulta técnica profunda sobre Testing, GTest y Auditoría de IA.</p>
+            <input type="text" id="chatInput" placeholder="Ej: ¿Cómo audito la cobertura semántica en un test generado?" onkeypress="if(event.key==='Enter') askGemini()">
+            <button onclick="askGemini()" id="sendBtn" style="width:100%; padding:18px; border-radius:15px; border:none; background:var(--apple-blue); color:white; font-weight:700; cursor:pointer;">Consultar a Gemini</button>
+            <div id="chatResponse" style="margin-top:20px; display:none; background:#f5f5f7; padding:20px; border-radius:15px; max-height:300px; overflow-y:auto; text-align:left; line-height: 1.8;"></div>
+        </div>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Presentation Controller
+        const deck = document.getElementById('deck');
+        const sections = document.querySelectorAll('section');
+        const dotNav = document.getElementById('dotNav');
+
+        // Pool of random animations
+        const animPool = ['trans-zoom', 'trans-up', 'trans-down', 'trans-left', 'trans-right', 'trans-flip'];
+
+        sections.forEach((s, i) => {
+            // Assign Random Animation to each section's content
+            const content = s.querySelector('.slide-content');
+            if (content) {
+                const randomAnim = animPool[Math.floor(Math.random() * animPool.length)];
+                content.classList.add(randomAnim);
+            }
+
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.dataset.target = s.id;
+            dot.onclick = () => scrollToId(s.id);
+            dotNav.appendChild(dot);
+        });
+
+        function scrollToId(id) {
+            const target = document.getElementById(id);
+            deck.scrollTo({ top: target.offsetTop, behavior: 'smooth' });
+        }
+
+        deck.addEventListener('scroll', () => {
+            let current = "";
+            sections.forEach(s => { if (deck.scrollTop >= s.offsetTop - 100) current = s.id; });
+            sections.forEach(s => s.classList.toggle('visible', s.id === current));
+            document.querySelectorAll('.dot').forEach(d => d.classList.toggle('active', d.dataset.target === current));
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.toggle('active', l.getAttribute('href') === `#${current}`));
+        });
+
+        // Gemini API Configuration
+        const apiKey = ""; 
+        const ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent";
+
+        async function apiCall(prompt, system) {
+            try {
+                const res = await fetch(`${ENDPOINT}?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: system }] } })
+                });
+                const data = await res.json();
+                return data.candidates[0].content.parts[0].text;
+            } catch(e) { return "Error de conexión técnica."; }
+        }
+
+        function toggleModal() {
+            const m = document.getElementById('geminiModal');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+            if(m.style.display === 'flex') document.getElementById('chatInput').focus();
+        }
+
+        async function askGemini() {
+            const i = document.getElementById('chatInput');
+            const r = document.getElementById('chatResponse');
+            const btn = document.getElementById('sendBtn');
+            const q = i.value.trim(); if(!q) return;
+
+            btn.disabled = true; btn.innerHTML = 'Razonando<span class="loader"></span>';
+            r.style.display = 'block'; r.innerHTML = '<em>Iniciando análisis semántico socrático...</em>';
+
+            const system = `Eres Jose Luis Oemig, docente de Algoritmos III. Resume temas del Módulo 6 (IA en Testing) de forma técnica y socrática. Explica la importancia de la validación humana obligatoria y los tests significativos frente a los superficiales.`;
+
+            try {
+                const text = await apiCall(q, system);
+                r.innerText = text;
+            } catch (e) { r.innerText = "Error."; }
+            finally { btn.disabled = false; btn.innerText = "Consultar a Gemini"; }
+        }
+
+        sections[0].classList.add('visible');
+    </script>
+</body>
+</html>

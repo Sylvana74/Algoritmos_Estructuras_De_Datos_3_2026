@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<p lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Python Flask REST API</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+</head>
+<body >
+
+    <div class="container">
+        
+        <strong><nav>
+          <ul class="menu">
+            <li><a href="">Home</a></li>
+            <li><a href="">About</a></li>
+          </ul>
+        </nav></strong>
+      </div>
+      </body>  <br>  <br></p>
+    <h1 class="logo">UFasta ISII - Team Members, Welcome!!!  </h1>
+       
+    <h3>
+        [Python REST APIs VirtEnv With Flask, SQLite Connexion, and SQLAlchemy & Swagger]
+    </h3>
+ 
+ 
+        {% for person in people %}
+        {{ person.fname }} {{ person.lname }}
+        <ul>
+            {% for note in person.notes %}
+            <li>
+                {{ note.content }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% endfor %}
+    </div>
+    <br>
+    <strong><nav>
+        <ul class="menu">
+          <li><a href="">Email</a></li>
+          <li><a href="http://127.0.0.1:8000/api/ui/">Swagger</a></li>
+        </ul>
+      </nav></strong>
+</body>
+</html>

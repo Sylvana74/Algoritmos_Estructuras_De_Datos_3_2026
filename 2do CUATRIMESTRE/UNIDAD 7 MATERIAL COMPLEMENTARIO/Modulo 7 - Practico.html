@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AED III - Evaluación Final: IA en el Ciclo de Vida del Software</title>
+    <!-- Bibliotecas de Estilo y Visualización -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --apple-black: #1d1d1f;
+            --apple-gray: #86868b;
+            --apple-blue: #0071e3;
+            --apple-bg: #ffffff;
+            --apple-light-gray: #f5f5f7;
+            --apple-green: #34c759;
+            --apple-red: #ff3b30;
+            --gemini-gradient: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+        }
+
+        * { box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', -apple-system, sans-serif;
+            background-color: var(--apple-bg);
+            color: var(--apple-black);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Contenedor Principal Centrado */
+        .eval-container {
+            width: 95%;
+            max-width: 900px;
+            background: white;
+            border-radius: 40px;
+            padding: 60px;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.06);
+            position: relative;
+            text-align: center;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Tipografía Masterclass */
+        .tag {
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            font-weight: 700;
+            letter-spacing: 0.2em;
+            color: var(--apple-gray);
+            display: block;
+            margin-bottom: 12px;
+        }
+
+        h1 { font-size: 2.8rem; font-weight: 900; letter-spacing: -0.05em; margin: 0; }
+        h2 { font-size: 1.8rem; font-weight: 700; margin-bottom: 25px; line-height: 1.3; }
+        h3 { font-size: 1.4rem; font-weight: 600; color: var(--apple-blue); margin-bottom: 15px; }
+        p { line-height: 1.75; color: #424245; font-size: 1.1rem; }
+
+        /* Vistas Funcionales */
+        .view-section { display: none; animation: fadeIn 0.6s ease-out; }
+        .view-section.active { display: block; }
+
+        /* Botones Pro */
+        .btn {
+            padding: 20px 40px;
+            border-radius: 20px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .btn-primary { background: var(--apple-black); color: white; margin: 30px auto 0; }
+        .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.15); }
+        .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+
+        .btn-tutor { background: var(--gemini-gradient); color: white; }
+
+        /* Portada Grid */
+        .intro-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 40px 0;
+            text-align: left;
+        }
+
+        .info-card {
+            background: var(--apple-light-gray);
+            padding: 30px;
+            border-radius: 28px;
+            height: 100%;
+        }
+
+        /* Quiz Logic UI */
+        .options-grid { display: grid; gap: 15px; margin-top: 30px; }
+        .option-box {
+            background: var(--apple-light-gray);
+            padding: 22px 30px;
+            border-radius: 22px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+            text-align: left;
+            font-weight: 500;
+            font-size: 1.05rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .option-box:hover { background: #f0f0f2; transform: scale(1.01); }
+        .option-box.selected { border-color: var(--apple-blue); background: white; }
+        .option-box.correct { background: #e8f5e9; border-color: var(--apple-green); color: #1b5e20; }
+        .option-box.wrong { background: #ffebee; border-color: var(--apple-red); color: #b71c1c; }
+
+        .progress-container {
+            width: 100%; height: 8px; background: #e5e5e7;
+            border-radius: 10px; margin-bottom: 40px; overflow: hidden;
+        }
+        #progressFill { width: 0%; height: 100%; background: var(--apple-blue); transition: width 0.5s ease; }
+
+        /* Tutor Panel */
+        .tutor-response {
+            margin-top: 30px; padding: 30px; border-radius: 24px;
+            background: #fbfbfd; border-left: 6px solid var(--apple-blue);
+            display: none; font-size: 1rem; line-height: 1.7; text-align: left;
+        }
+
+        /* Resultados Finales */
+        .score-circle {
+            width: 180px; height: 180px; border-radius: 50%;
+            border: 12px solid var(--apple-blue); display: flex;
+            justify-content: center; align-items: center;
+            font-size: 4rem; font-weight: 900; margin: 0 auto 30px;
+        }
+
+        .sankalpa-closing {
+            font-style: italic; color: var(--apple-gray);
+            margin-top: 50px; padding: 40px; border-top: 1px solid #eee;
+            line-height: 1.8;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .loader:after { content: '...'; animation: load 1.5s infinite; }
+        @keyframes load { 0% { content: '.'; } 33% { content: '..'; } 66% { content: '...'; } }
+
+        @media (max-width: 750px) {
+            .eval-container { padding: 30px; }
+            .intro-grid { grid-template-columns: 1fr; }
+            h1 { font-size: 2.2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="eval-container" id="mainWrapper">
+        
+        <!-- PANTALLA 1: PORTADA -->
+        <div id="introView" class="view-section active">
+            <span class="tag">Módulo 7 · Evaluación de Integración</span>
+            <h1>La IA en el Ciclo de Ingeniería</h1>
+            
+            <div class="intro-grid">
+                <div class="info-card">
+                    <h3>¿Qué se busca?</h3>
+                    <p>Validar el dominio de la orquestación de IA a través de todas las fases del SDLC, desde la detección de ambigüedades en el análisis hasta el soporte decisional en el mantenimiento estratégico.</p>
+                </div>
+                <div class="info-card">
+                    <h3>¿Qué se aprende?</h3>
+                    <p>A consolidar la soberanía del pensamiento técnico, integrando la inferencia masiva como un socio estratégico para mitigar la deuda técnica y asegurar la integridad arquitectónica.</p>
+                </div>
+            </div>
+
+            <div style="text-align: left; background: var(--apple-light-gray); padding: 30px; border-radius: 28px; margin-bottom: 30px;">
+                <h3>Objetivos Pedagógicos:</h3>
+                <ul style="line-height: 1.8; color: #424245;">
+                    <li>Comprender la trazabilidad semántica transversal en el ciclo.</li>
+                    <li>Auditar el "Drift Arquitectónico" mediante herramientas de IA.</li>
+                    <li>Gestionar la deuda técnica cuantitativa asistida por modelos.</li>
+                    <li>Liderar el proceso decisional como Arquitecto Soberano.</li>
+                </ul>
+            </div>
+
+            <button class="btn btn-primary" onclick="setView('quizView')">Iniciar Evaluación Sistémica</button>
+        </div>
+
+        <!-- PANTALLA 2: CUESTIONARIO -->
+        <div id="quizView" class="view-section">
+            <div class="progress-container"><div id="progressFill"></div></div>
+            
+            <div id="quizTarget">
+                <!-- Inyectado por JS -->
+            </div>
+
+            <div class="tutor-response" id="tutorPanel">
+                <h4 style="margin: 0 0 10px 0; color: var(--apple-blue); font-weight: 800;">
+                    <i data-lucide="brain-circuit" style="vertical-align: middle;"></i> Consulta Socrática
+                </h4>
+                <div id="tutorContent"></div>
+            </div>
+
+            <div style="display:flex; justify-content: space-between; align-items: center; margin-top: 40px; gap: 20px;">
+                <button class="btn btn-tutor" onclick="askTutorConsultant()"><i data-lucide="sparkles"></i> Consultar al Tutor</button>
+                <button class="btn btn-primary" id="nextBtn" onclick="advanceQuestion()" disabled style="flex-grow: 1; margin:0;">Siguiente Dimensión</button>
+            </div>
+        </div>
+
+        <!-- PANTALLA 3: CIERRE / DEVOLUCIÓN -->
+        <div id="closingView" class="view-section">
+            <span class="tag">Simulación Finalizada</span>
+            <h2 id="feedbackHeader">Evaluando Perfil Profesional...</h2>
+            
+            <div class="score-circle" id="finalScoreDisplay">0</div>
+            
+            <div id="technicalReport" style="text-align: left; background: var(--apple-light-gray); padding: 40px; border-radius: 32px; margin: 30px 0;">
+                <!-- Devolución Técnica Inyectada -->
+            </div>
+
+            <div class="sankalpa-closing" id="sankalpaMessage">
+                <!-- Mensaje Sankalpa Inyectado -->
+            </div>
+
+            <button class="btn btn-primary" style="margin: 40px auto 0;" onclick="location.reload()">Reiniciar Simulación</button>
+        </div>
+
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // Banco de Preguntas Módulo 7
+        const questions = [
+            {
+                q: "¿Cuál es el principal valor estratégico de integrar la IA en la fase de Análisis de Requerimientos?",
+                o: [
+                    "Escribir automáticamente los correos electrónicos para el cliente.",
+                    "Identificar ambigüedades lógicas, conflictos entre requerimientos y escenarios de falla no contemplados.",
+                    "Reemplazar la necesidad de un analista funcional humano.",
+                    "Generar el presupuesto del proyecto basado en la cantidad de palabras."
+                ],
+                c: 1,
+                hint: "Piensa en la IA como un 'Red Team' que busca agujeros en la descripción del problema."
+            },
+            {
+                q: "En la fase de Diseño, ¿qué permite asegurar la IA respecto a la arquitectura sistémica?",
+                o: [
+                    "Que todos los diagramas tengan el mismo color de fondo.",
+                    "La trazabilidad semántica entre el blueprint arquitectónico y la futura implementación.",
+                    "Que no se necesite usar Git para versionalizar el código.",
+                    "La eliminación total de la necesidad de documentar el sistema."
+                ],
+                c: 1,
+                hint: "Se trata de que el código generado no 'olvide' las decisiones de diseño previas."
+            },
+            {
+                q: "Durante la Implementación asistida, ¿cuál es el rol innegociable del ingeniero soberano?",
+                o: [
+                    "Copiar y pegar todos los fragmentos que el modelo sugiera para ganar tiempo.",
+                    "Auditar la eficiencia Big O y la adherencia del código generado a las invariantes de diseño definidas.",
+                    "Programar en lenguaje ensamblador para verificar a la IA.",
+                    "Dejar que la IA decida la arquitectura de capas basándose en su probabilidad."
+                ],
+                c: 1,
+                hint: "La IA es el pincel; el humano es quien decide dónde poner la pintura y por qué."
+            },
+            {
+                q: "¿Cómo impacta el uso transversal de la IA en la fase de Code Review industrial?",
+                o: [
+                    "Permite aprobar Pull Requests sin necesidad de lectura humana.",
+                    "Transforma el proceso en una auditoría semántica continua que detecta olores de código y vulnerabilidades preventivamente.",
+                    "Oculta los errores lógicos para que el sistema parezca más estable.",
+                    "Aumenta el tiempo de revisión al tener que discutir con el modelo."
+                ],
+                c: 1,
+                hint: "Es como tener un vigía 24/7 que conoce todos los antipatrones del mundo."
+            },
+            {
+                q: "¿Cuál es el objetivo de integrar la IA proactivamente en la fase de Testing?",
+                o: [
+                    "Generar tests que siempre pasen para cumplir con el cronograma.",
+                    "Trascender la cobertura nominal de líneas para alcanzar la validación semántica de invariantes algorítmicas.",
+                    "Eliminar el uso de frameworks como GTest o PyTest.",
+                    "Automatizar la corrección del código sin informar al desarrollador."
+                ],
+                c: 1,
+                hint: "Un test exitoso no es el que pasa, sino el que demuestra que las reglas del sistema se cumplen."
+            },
+            {
+                q: "En el Mantenimiento de sistemas heredados (legacy), ¿qué función cumple la IA?",
+                o: [
+                    "Borrar el código antiguo para empezar de cero.",
+                    "Actuar como un arqueólogo digital capaz de extraer el modelo mental y la intención de código no documentado.",
+                    "Traducir todo el código a lenguaje natural para leerlo como una novela.",
+                    "Asegurar que el sistema no se actualice nunca para evitar errores."
+                ],
+                c: 1,
+                hint: "La IA puede 'leer entre líneas' lo que el programador de hace 10 años intentó hacer."
+            },
+            {
+                q: "¿Qué se entiende por 'IA y Deuda Técnica' en el contexto de este módulo?",
+                o: [
+                    "Que usar IA es más caro que contratar programadores juniors.",
+                    "El uso de la IA como auditor para identificar, cuantificar y planificar la mitigación de decisiones de diseño apresuradas.",
+                    "La deuda de dinero que la empresa tiene con los proveedores de tokens.",
+                    "Que la IA genera deuda técnica que nadie puede resolver."
+                ],
+                c: 1,
+                hint: "La deuda técnica es invisible hasta que se mide; la IA ayuda a visibilizarla."
+            },
+            {
+                q: "¿Qué es el 'Drift Arquitectónico' y cómo ayuda la IA a mitigarlo?",
+                o: [
+                    "Es el movimiento físico de los servidores en el data center.",
+                    "Es la desviación de la implementación respecto al diseño; la IA lo monitorea comparando el AST del código con el modelo original.",
+                    "Es la actualización de la versión del compilador.",
+                    "Es cuando la IA cambia de modelo durante el entrenamiento."
+                ],
+                c: 1,
+                hint: "¿El código actual sigue siendo fiel al plano que dibujamos al principio?"
+            },
+            {
+                q: "Como herramienta de 'Soporte Decisional', ¿cuál es la función de la IA para un Arquitecto de Software?",
+                o: [
+                    "Tomar todas las decisiones estratégicas de forma autónoma.",
+                    "Asesorar al arquitecto mediante el modelado de escenarios hipotéticos y el análisis de trade-offs técnicos.",
+                    "Elegir el color de la interfaz de usuario.",
+                    "Contratar al personal técnico necesario."
+                ],
+                c: 1,
+                hint: "La IA no decide; la IA informa al que decide."
+            },
+            {
+                q: "Según la conclusión del Módulo 7, ¿cuándo se alcanza la 'Maestría Aumentada'?",
+                o: [
+                    "Cuando el programador ya no necesita escribir una sola línea de código.",
+                    "Cuando el ingeniero desarrolla una 'visión binocular' entre el determinismo del hardware y la estocasticidad de la IA.",
+                    "Cuando se utiliza la versión paga de todos los modelos de IA.",
+                    "Cuando el sistema se despliega en menos de 5 minutos."
+                ],
+                c: 1,
+                hint: "Es el equilibrio perfecto entre el rigor humano y la potencia del modelo."
+            }
+        ];
+
+        let currentIdx = 0;
+        let score = 0;
+        const apiKey = ""; 
+
+        function setView(id) {
+            document.querySelectorAll('.view-section').forEach(v => v.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if(id === 'quizView') renderNextQuestion();
+        }
+
+        function renderNextQuestion() {
+            const data = questions[currentIdx];
+            const container = document.getElementById('quizTarget');
+            document.getElementById('tutorPanel').style.display = 'none';
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('progressFill').style.width = `${((currentIdx) / questions.length) * 100}%`;
+
+            container.innerHTML = `
+                <span class="tag">Dimensión ${currentIdx + 1} de ${questions.length}</span>
+                <h2>${data.q}</h2>
+                <div class="options-grid">
+                    ${data.o.map((opt, i) => `
+                        <div class="option-box" onclick="checkSelectedOption(${i})" id="opt-${i}">
+                            ${opt}
+                            <i data-lucide="circle" size="18"></i>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            lucide.createIcons();
+        }
+
+        function checkSelectedOption(idx) {
+            const data = questions[currentIdx];
+            const options = document.querySelectorAll('.option-box');
+            options.forEach(o => o.style.pointerEvents = 'none');
+
+            if(idx === data.c) {
+                document.getElementById(`opt-${idx}`).classList.add('correct');
+                score++;
+            } else {
+                document.getElementById(`opt-${idx}`).classList.add('wrong');
+                document.getElementById(`opt-${data.c}`).classList.add('correct');
+            }
+
+            document.getElementById('nextBtn').disabled = false;
+            if(currentIdx === questions.length - 1) {
+                document.getElementById('nextBtn').innerText = "Finalizar y Ver Devolución";
+            }
+        }
+
+        function advanceQuestion() {
+            currentIdx++;
+            if(currentIdx < questions.length) {
+                renderNextQuestion();
+            } else {
+                showFinalResultsView();
+            }
+        }
+
+        function showFinalResultsView() {
+            setView('closingView');
+            const finalScore = Math.round((score / questions.length) * 10);
+            document.getElementById('finalScoreDisplay').innerText = finalScore;
+
+            let title = ""; let techReport = ""; let sankalpa = "";
+
+            if(finalScore >= 8) {
+                title = "¡Arquitecto de Sistemas Maestro!";
+                techReport = "Has demostrado un dominio excepcional de la integración sistémica. Comprendes que la IA es una palanca transversal que requiere una auditoría soberana en cada fase del ciclo de vida para garantizar la resiliencia industrial.";
+                sankalpa = "Tu claridad técnica es el reflejo de un propósito alineado. Has logrado integrar el orden mental con la complejidad algorítmica. Sigue liderando con integridad y consciencia en este nuevo horizonte tecnológico.";
+            } else if(finalScore >= 5) {
+                title = "Ingeniero de Software en Evolución";
+                techReport = "Posees una base sólida sobre el impacto de la IA en el SDLC, pero debes profundizar en el análisis de deuda técnica y en la mitigación del drift arquitectónico para consolidar tu soberanía frente al modelo.";
+                sankalpa = "El aprendizaje es un acto de presencia. Refina tu atención en cada fase del ciclo hasta que la orquestación de la IA sea una extensión natural de tu intención creativa.";
+            } else {
+                title = "Explorador de Ciclos de Vida";
+                techReport = "Es fundamental fortalecer los conceptos de trazabilidad semántica y auditoría semántica. Sin un entendimiento profundo de cómo la IA impacta transversalmente, el sistema corre el riesgo de volverse ingobernable.";
+                sankalpa = "No hay error, solo datos para la evolución. Vuelve a la teoría con quietud y redescubre el orden que yace en la ingeniería sistémica. La maestría nace de la persistencia consciente.";
+            }
+
+            document.getElementById('feedbackHeader').innerText = title;
+            document.getElementById('technicalReport').innerHTML = `<h3>Análisis de Perfil Técnico:</h3><p>${techReport}</p>`;
+            document.getElementById('sankalpaMessage').innerHTML = `<p>${sankalpa}</p><p style="margin-top:25px; font-weight:800; color:var(--apple-black);">— Prof. Jose Luis Oemig (Sankalpa Online)</p>`;
+        }
+
+        async function askTutorConsultant() {
+            const panel = document.getElementById('tutorPanel');
+            const text = document.getElementById('tutorContent');
+            const data = questions[currentIdx];
+
+            panel.style.display = 'block';
+            text.innerHTML = '<span class="loader">El núcleo socrático está analizando tu duda</span>';
+
+            const query = `Estoy en una evaluación final de Ingeniería de Software (Módulo 7). La pregunta es: "${data.q}". La respuesta correcta es "${data.o[data.c]}". Explícame el concepto técnico de forma socrática, profunda y motivadora, como un docente experto. No des la respuesta directamente si el alumno no ha respondido.`;
+            const sys = "Eres Jose Luis Oemig, docente universitario de Ingeniería y experto en Educación. Tu tono es profesional, alentador y profundamente técnico. Usa conceptos como SDLC, Drift Arquitectónico, Deuda Técnica y Soberanía.";
+
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                const res = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: query }] }], systemInstruction: { parts: [{ text: sys }] } })
+                });
+                const result = await res.json();
+                text.innerText = result.candidates[0].content.parts[0].text;
+            } catch (e) { text.innerText = "La conexión con el motor socrático ha fallado. Reintenta en unos instantes."; }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+Hola.
+
+Realizar un trabajo práctico que implemente Flasch en una relación de una muchos con un tema a eleccion.
+Un abrazo.
+
+JOSE LUIS

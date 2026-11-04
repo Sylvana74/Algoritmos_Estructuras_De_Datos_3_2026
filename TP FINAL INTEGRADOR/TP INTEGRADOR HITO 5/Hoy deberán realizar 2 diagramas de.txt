@@ -1,0 +1,9 @@
+Hoy deberán realizar 2 diagramas de secuencia. 
+Uno para asignar el tipo de producto al producto y el otro para cambiar el estado del Ticket.
+Contemplar que los diagramas los inicia el usuario (monigote).
+Noten los Objetos que "emergen".
+PD: De ser necesario actualizar el Diagrama de Clases.
+
+
+Espero los TPs.
+Recuerden el Compromiso de  lo que hablamos.
