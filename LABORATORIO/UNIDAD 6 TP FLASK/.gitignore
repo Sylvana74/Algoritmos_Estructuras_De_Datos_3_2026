@@ -1,0 +1,15 @@
+# Entorno virtual
+venv/
+env/
+
+# Archivos de caché de Python
+__pycache__/
+*.pyc
+
+# Base de datos local
+library.db
+*.db
+*.sqlite3
+
+# Archivo de pruebas de depuración
+test_debug.py
