@@ -1,0 +1,100 @@
+openapi: 3.0.0
+info:
+  title: "API REST Clientes SQLite"
+  description: "API para administración de clientes implementada con Flask, Connexion y SQLite"
+  version: "1.0.0"
+
+servers:
+  - url: "/api"
+
+components:
+  schemas:
+    Customer:
+      type: "object"
+      required:
+        - lname
+        - fname
+        - email
+      properties:
+        fname:
+          type: "string"
+        lname:
+          type: "string"
+        email:
+          type: "string"
+        phone:
+          type: "string"
+  parameters:
+    lname:
+      name: "lname"
+      description: "Apellido del cliente"
+      in: path
+      required: True
+      schema:
+        type: "string"
+
+paths:
+  /customers:
+    get:
+      operationId: "customers.read_all"
+      tags:
+        - "Customers"
+      summary: "Obtener lista completa de clientes"
+      responses:
+        "200":
+          description: "Lista de clientes leída exitosamente"
+    post:
+      operationId: "customers.create"
+      tags:
+        - "Customers"
+      summary: "Crear un nuevo cliente"
+      requestBody:
+        description: "Datos del cliente a crear"
+        required: True
+        content:
+          application/json:
+            schema:
+              x-body-name: "customer"
+              $ref: "#/components/schemas/Customer"
+      responses:
+        "201":
+          description: "Cliente creado exitosamente"
+
+  /customers/{lname}:
+    get:
+      operationId: "customers.read_one"
+      tags:
+        - "Customers"
+      summary: "Obtener un cliente por apellido"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      responses:
+        "200":
+          description: "Cliente encontrado"
+    put:
+      operationId: "customers.update"
+      tags:
+        - "Customers"
+      summary: "Actualizar datos de un cliente"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      requestBody:
+        description: "Nuevos datos del cliente"
+        content:
+          application/json:
+            schema:
+              x-body-name: "customer"
+              $ref: "#/components/schemas/Customer"
+      responses:
+        "200":
+          description: "Cliente actualizado exitosamente"
+    delete:
+      operationId: "customers.delete"
+      tags:
+        - "Customers"
+      summary: "Eliminar un cliente"
+      parameters:
+        - $ref: "#/components/parameters/lname"
+      responses:
+        "200":
+          description: "Cliente eliminado exitosamente"
